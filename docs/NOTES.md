@@ -6,10 +6,14 @@ Z katalogu głównego repozytorium (tam, gdzie leży `docker-compose.yml`):
 `docker compose up --build -d
 ```
 
-- **Symfony (Insta Shot)**: [http://localhost:8000](http://localhost:8000) — kontener `symfony` uruchamia `composer install`, czeka na Postgresa (`symfony-db`), wykonuje migracje Doctrine i `app:seed`, potem serwer PHP na porcie 8000.
-- **Phoenix API**: [http://localhost:4000](http://localhost:4000) — kontener `phoenix` uruchamia `mix ecto.migrate`, seed z `priv/repo/seeds.exs` i `mix phx.server`.
+- **Symfony (Insta Shot)**: [http://localhost:8000](http://localhost:8000) — kontener `symfony` uruchamia
+  `composer install`, czeka na Postgresa (`symfony-db`), wykonuje migracje Doctrine i `app:seed`, potem serwer PHP na
+  porcie 8000.
+- **Phoenix API**: [http://localhost:4000](http://localhost:4000) — kontener `phoenix` uruchamia `mix ecto.migrate`,
+  seed z `priv/repo/seeds.exs` i `mix phx.server`.
 
-Symfony wewnątrz sieci Docker łączy się z Phoenix przez `PHOENIX_BASE_URL=http://phoenix:4000` (ustawione w `docker-compose.yml`).
+Symfony wewnątrz sieci Docker łączy się z Phoenix przez `PHOENIX_BASE_URL=http://phoenix:4000` (ustawione w
+`docker-compose.yml`).
 
 Jeśli kiedyś trzeba ręcznie powtórzyć migracje lub seed tylko dla Symfony:
 
@@ -20,30 +24,35 @@ docker compose exec symfony php bin/console app:seed --no-interaction
 
 ## Dane logowania
 
-W polu **token** wpisujesz **64-znakowy token hex** z seeda (nie jest to klasyczne hasło). Wartości są stałe i zdefiniowane w `symfony-app/src/Shared/Command/SeedDatabaseCommand.php` (`SEED_AUTH_TOKENS_BY_USERNAME`).
+W polu **token** wpisujesz **64-znakowy token hex** z seeda (nie jest to klasyczne hasło). Wartości są stałe i
+zdefiniowane w `symfony-app/src/Shared/Command/SeedDatabaseCommand.php` (`SEED_AUTH_TOKENS_BY_USERNAME`).
 
-| Username           | Token (hex)                                                                                    |
-| ------------------ | ---------------------------------------------------------------------------------------------- |
-| `nature_lover`     | `0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef`                             |
-| `wildlife_pro`     | `fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210`                             |
-| `landscape_dreams` | `aaaabbbbccccddddeeeeffff00001111aaaabbbbccccddddeeeeffff00001111`                             |
-| `animal_eyes`      | `111122223333444455556666777788889999aaaabbbbccccddddeeeeffff0000`                             |
+| Username           | Token (hex)                                                        |
+|--------------------|--------------------------------------------------------------------|
+| `nature_lover`     | `0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef` |
+| `wildlife_pro`     | `fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210` |
+| `landscape_dreams` | `aaaabbbbccccddddeeeeffff00001111aaaabbbbccccddddeeeeffff00001111` |
+| `animal_eyes`      | `111122223333444455556666777788889999aaaabbbbccccddddeeeeffff0000` |
 
 ## Tokeny Phoenix API
 
-Wartości pochodzą z `phoenix-api/priv/repo/seeds.exs` (uruchamiane przy starcie kontenera `phoenix`). Żądania do API (np. `GET /api/photos`) wymagają nagłówka **`access-token`** z jednym z poniższych tokenów — każdy odpowiada innemu użytkownikowi Phoenix i innemu zestawowi zdjęć w seedzie.
+Wartości pochodzą z `phoenix-api/priv/repo/seeds.exs` (uruchamiane przy starcie kontenera `phoenix`). Żądania do API (
+np. `GET /api/photos`) wymagają nagłówka **`access-token`** z jednym z poniższych tokenów — każdy odpowiada innemu
+użytkownikowi Phoenix i innemu zestawowi zdjęć w seedzie.
 
-| Użytkownik w seedzie | `api_token` (nagłówek `access-token`)   |
-| -------------------- | ---------------------------------------- |
-| user 1               | `test_token_user1_abc123`                |
-| user 2               | `test_token_user2_def456`                |
+| Użytkownik w seedzie | `api_token` (nagłówek `access-token`) |
+|----------------------|---------------------------------------|
+| user 1               | `test_token_user1_abc123`             |
+| user 2               | `test_token_user2_def456`             |
 
 ## Jakość kodu i testy (Symfony)
 
-- Skrypt `symfony-app/scripts/quality.sh` uruchamia po kolei: **PHPStan**, **PHPCS**, **phpcpd** (PHAR w `tools/phpcpd.phar`), migracje Doctrine na `env=test` (gdy ustawione jest `DATABASE_URL`) oraz **PHPUnit**.
+- Skrypt `symfony-app/scripts/quality.sh` uruchamia po kolei: **PHPStan**, **PHPCS**, **phpcpd** (PHAR w
+  `tools/phpcpd.phar`), migracje Doctrine na `env=test` (gdy ustawione jest `DATABASE_URL`) oraz **PHPUnit**.
 - Lokalnie (bez Dockera): z katalogu `symfony-app` ustaw `DATABASE_URL` na Postgresa i uruchom `./scripts/quality.sh`.
-- Skrót `composer quality` w `symfony-app` uruchamia PHPStan, PHPCS, phpcpd i PHPUnit, ale **bez** migracji — przed smoke testami ustaw `DATABASE_URL` i wykonaj migracje (`doctrine:migrations:migrate --env=test`) albo użyj `./scripts/quality.sh`.
-
+- Skrót `composer quality` w `symfony-app` uruchamia PHPStan, PHPCS, phpcpd i PHPUnit, ale **bez** migracji — przed
+  smoke testami ustaw `DATABASE_URL` i wykonaj migracje (`doctrine:migrations:migrate --env=test`) albo użyj
+  `./scripts/quality.sh`.
 
 ## Zadanie 1
 
@@ -64,3 +73,12 @@ Zrobione.
 ## Zadanie 4
 
 Zrobione.
+
+## Komentarz
+
+Starałem się jak najbardziej pokazać moje umiejętności, zastanawiałem się nad używaniem bardziej skomplikowanej
+architektury jak np. hexagon albo architektury 4 warstwowej, lecz uznałem to za przerost formy nad treścią.
+Kod jest otestowany, podłączana jest analiza statyczna. W zasadzie ze wszystkim zdażyłem, wspomagałem się rzecz jasna
+Cursorem, zwłaszcza do zadania nr. 4, dzięki temu udało mi się to zadanie w obecnym kształcie ukończyć w kilka h.
+Moim zdaniem w obecnych czasach nawet najszybciej piszący programista nie jest w stanie pisać kodu szybciej niż agenci
+AI, dlatego staram się korzystać i wnosić realną wartość wspomaganiem się tymi narzędziami.
