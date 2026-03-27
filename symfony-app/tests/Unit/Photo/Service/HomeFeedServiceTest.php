@@ -8,6 +8,7 @@ use App\Auth\Entity\User;
 use App\Auth\Repository\UserRepositoryInterface;
 use App\Like\Service\LikeServiceInterface;
 use App\Photo\Entity\Photo;
+use App\Photo\Dto\Request\HomeFeedFilterQuery;
 use App\Photo\Mapper\PhotoFeedMapper;
 use App\Photo\Repository\PhotoRepositoryInterface;
 use App\Photo\Service\HomeFeedService;
@@ -18,7 +19,8 @@ final class HomeFeedServiceTest extends TestCase
     public function testBuildsEmptyFeedWhenNoPhotos(): void
     {
         $photoRepo = $this->createMock(PhotoRepositoryInterface::class);
-        $photoRepo->method('findAllWithUsers')->willReturn([]);
+        $photoRepo->method('countHomeFeedPhotos')->willReturn(0);
+        $photoRepo->method('findHomeFeedPhotos')->willReturn([]);
 
         $userRepo = $this->createMock(UserRepositoryInterface::class);
         $likeService = $this->createMock(LikeServiceInterface::class);
@@ -30,16 +32,19 @@ final class HomeFeedServiceTest extends TestCase
             likeService: $likeService,
             photoFeedMapper: $mapper,
         );
-        $feed = $service->buildHomeFeed(null);
+        $feed = $service->buildHomeFeed(null, new HomeFeedFilterQuery());
 
         $this->assertSame([], $feed->getPhotos());
         $this->assertNull($feed->getCurrentUser());
+        $this->assertSame(0, $feed->getTotalPhotos());
+        $this->assertSame(1, $feed->getPage());
     }
 
     public function testIgnoresStaleSessionUserIdWhenUserRemoved(): void
     {
         $photoRepo = $this->createMock(PhotoRepositoryInterface::class);
-        $photoRepo->method('findAllWithUsers')->willReturn([]);
+        $photoRepo->method('countHomeFeedPhotos')->willReturn(0);
+        $photoRepo->method('findHomeFeedPhotos')->willReturn([]);
 
         $userRepo = $this->createMock(UserRepositoryInterface::class);
         $userRepo->method('find')->with(42)->willReturn(null);
@@ -53,7 +58,7 @@ final class HomeFeedServiceTest extends TestCase
             likeService: $likeService,
             photoFeedMapper: $mapper,
         );
-        $feed = $service->buildHomeFeed(42);
+        $feed = $service->buildHomeFeed(42, new HomeFeedFilterQuery());
 
         $this->assertNull($feed->getCurrentUser());
     }
@@ -82,7 +87,8 @@ final class HomeFeedServiceTest extends TestCase
         $photo->method('getUser')->willReturn($author);
 
         $photoRepo = $this->createMock(PhotoRepositoryInterface::class);
-        $photoRepo->method('findAllWithUsers')->willReturn([$photo]);
+        $photoRepo->method('countHomeFeedPhotos')->willReturn(1);
+        $photoRepo->method('findHomeFeedPhotos')->willReturn([$photo]);
 
         $userRepo = $this->createMock(UserRepositoryInterface::class);
         $userRepo->method('find')->with(1)->willReturn($sessionUser);
@@ -99,7 +105,7 @@ final class HomeFeedServiceTest extends TestCase
             likeService: $likeService,
             photoFeedMapper: new PhotoFeedMapper(),
         );
-        $feed = $service->buildHomeFeed(1);
+        $feed = $service->buildHomeFeed(1, new HomeFeedFilterQuery());
 
         $this->assertNotNull($feed->getCurrentUser());
         $this->assertSame(1, $feed->getCurrentUser()->getId());
@@ -107,5 +113,6 @@ final class HomeFeedServiceTest extends TestCase
         $this->assertCount(1, $photos);
         $this->assertTrue($photos[0]->isLikedByCurrentUser());
         $this->assertSame(10, $photos[0]->getId());
+        $this->assertSame(1, $feed->getTotalPhotos());
     }
 }

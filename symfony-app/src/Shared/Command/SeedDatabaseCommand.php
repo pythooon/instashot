@@ -20,6 +20,16 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 final class SeedDatabaseCommand extends Command
 {
+    /**
+     * @var array<string, string>
+     */
+    private const SEED_AUTH_TOKENS_BY_USERNAME = [
+        'nature_lover' => '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+        'wildlife_pro' => 'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210',
+        'landscape_dreams' => 'aaaabbbbccccddddeeeeffff00001111aaaabbbbccccddddeeeeffff00001111',
+        'animal_eyes' => '111122223333444455556666777788889999aaaabbbbccccddddeeeeffff0000',
+    ];
+
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
     ) {
@@ -99,14 +109,19 @@ final class SeedDatabaseCommand extends Command
         $this->entityManager->flush();
 
         foreach ($users as $user) {
-            $token = bin2hex(random_bytes(32));
+            $username = $user->getUsername();
+            if (!isset(self::SEED_AUTH_TOKENS_BY_USERNAME[$username])) {
+                throw new \LogicException('Brak ustalonego tokenu seeda dla użytkownika: ' . $username);
+            }
+
+            $token = self::SEED_AUTH_TOKENS_BY_USERNAME[$username];
             $authToken = new AuthToken();
             $authToken->setToken($token)
                 ->setUser($user);
 
             $this->entityManager->persist($authToken);
 
-            $io->text("Created auth token for {$user->getUsername()}: {$token}");
+            $io->text("Created auth token for {$username}");
         }
 
         $this->entityManager->flush();

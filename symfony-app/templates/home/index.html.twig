@@ -41,10 +41,14 @@
             padding: 20px;
         }
         
-        .like-button {
+        .photo-like-form {
             position: absolute;
             bottom: 15px;
             right: 15px;
+            margin: 0;
+        }
+
+        .like-button {
             background: white;
             border: 2px solid #667eea;
             border-radius: 25px;
@@ -59,6 +63,7 @@
             gap: 6px;
             transition: all 0.2s ease;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-family: inherit;
         }
         
         .like-button:hover {
@@ -149,10 +154,161 @@
             font-size: 2em;
             margin-bottom: 10px;
         }
+
+        .feed-filters {
+            background: rgba(255,255,255,0.95);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+        }
+
+        .feed-filters h2 {
+            font-size: 1.05em;
+            color: #444;
+            margin-bottom: 14px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px 16px;
+            align-items: end;
+        }
+
+        .filter-field label {
+            display: block;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .filter-field input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ccd;
+            border-radius: 8px;
+            font-size: 0.95em;
+            box-sizing: border-box;
+        }
+
+        .filter-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .filter-actions button, .filter-actions a.clear-filters {
+            padding: 10px 18px;
+            border-radius: 22px;
+            font-weight: 600;
+            font-size: 0.9em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+        }
+
+        .filter-actions button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .filter-actions a.clear-filters {
+            background: #eee;
+            color: #444;
+        }
+
+        .feed-pagination {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px 20px;
+            margin: 28px 0 10px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .feed-pagination .pagination-meta {
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .feed-pagination .pagination-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feed-pagination a,
+        .feed-pagination span.disabled {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-decoration: none;
+        }
+
+        .feed-pagination a {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .feed-pagination a:hover {
+            opacity: 0.92;
+        }
+
+        .feed-pagination span.disabled {
+            background: #e8e8e8;
+            color: #999;
+            cursor: not-allowed;
+        }
+
     </style>
 {% endblock %}
 
 {% block body %}
+    <div class="feed-filters">
+        <h2>Filtry galerii</h2>
+        <form method="get" action="{{ path('home') }}">
+            <div class="filter-grid">
+                <div class="filter-field">
+                    <label for="f_location">location</label>
+                    <input id="f_location" type="text" name="location" value="{{ filter.location|default('') }}" placeholder="np. Beach">
+                </div>
+                <div class="filter-field">
+                    <label for="f_camera">camera</label>
+                    <input id="f_camera" type="text" name="camera" value="{{ filter.camera|default('') }}" placeholder="np. Canon">
+                </div>
+                <div class="filter-field">
+                    <label for="f_description">description</label>
+                    <input id="f_description" type="text" name="description" value="{{ filter.description|default('') }}" placeholder="fragment opisu">
+                </div>
+                <div class="filter-field">
+                    <label for="f_taken_at">taken_at</label>
+                    <input id="f_taken_at" type="date" name="takenAt" value="{{ filter.takenAt|default('') }}">
+                </div>
+                <div class="filter-field">
+                    <label for="f_username">username</label>
+                    <input id="f_username" type="text" name="username" value="{{ filter.username|default('') }}" placeholder="@author">
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button type="submit">Zastosuj</button>
+                <a class="clear-filters" href="{{ path('home') }}">Wyczyść</a>
+            </div>
+        </form>
+    </div>
+
     {% if feed.photos|length > 0 %}
         <div class="photo-grid">
             {% for photo in feed.photos %}
@@ -160,10 +316,14 @@
                     <div class="photo-image-container">
                         <img src="{{ photo.imageUrl }}" alt="{{ photo.description }}">
                         {% if feed.currentUser %}
-                            <a href="{{ path('photo_like', {photoId: photo.id}) }}" class="like-button {{ photo.likedByCurrentUser ? 'liked' : '' }}">
-                                {{ photo.likedByCurrentUser ? '❤️' : '🤍' }}
-                                <span>{{ photo.likeCounter }}</span>
-                            </a>
+                            <form method="post" action="{{ path('photo_like') }}" class="photo-like-form">
+                                <input type="hidden" name="_token" value="{{ csrf_token(photo_like_csrf) }}">
+                                <input type="hidden" name="photoId" value="{{ photo.id }}">
+                                <button type="submit" class="like-button {{ photo.likedByCurrentUser ? 'liked' : '' }}">
+                                    {{ photo.likedByCurrentUser ? '❤️' : '🤍' }}
+                                    <span>{{ photo.likeCounter }}</span>
+                                </button>
+                            </form>
                         {% else %}
                             <span class="like-button disabled" title="Login to like">
                                 🤍
@@ -211,10 +371,35 @@
                 </div>
             {% endfor %}
         </div>
+        {% if feed.totalPhotos > 0 %}
+            <nav class="feed-pagination" aria-label="Paginacja galerii">
+                <span class="pagination-meta">
+                    {{ feed.rangeStart }}–{{ feed.rangeEnd }} z {{ feed.totalPhotos }}
+                </span>
+                <div class="pagination-nav">
+                    {% if feed.page > 1 %}
+                        <a href="{{ path('home', app.request.query.all|merge({ page: feed.page - 1 })) }}">← Poprzednia</a>
+                    {% else %}
+                        <span class="disabled">← Poprzednia</span>
+                    {% endif %}
+                    <span class="pagination-meta">Strona {{ feed.page }} / {{ feed.pageCount }}</span>
+                    {% if feed.page < feed.pageCount %}
+                        <a href="{{ path('home', app.request.query.all|merge({ page: feed.page + 1 })) }}">Następna →</a>
+                    {% else %}
+                        <span class="disabled">Następna →</span>
+                    {% endif %}
+                </div>
+            </nav>
+        {% endif %}
     {% else %}
         <div class="empty-state">
-            <h2>📷 No photos yet</h2>
-            <p>Be the first to share your photography!</p>
+            {% if homeFeedFiltersActive %}
+                <h2>Brak zdjęć dla wybranych filtrów</h2>
+                <p>Zmień kryteria albo <a href="{{ path('home') }}">wyczyść filtry</a>, żeby zobaczyć całą galerię.</p>
+            {% else %}
+                <h2>📷 No photos yet</h2>
+                <p>Be the first to share your photography!</p>
+            {% endif %}
         </div>
     {% endif %}
 {% endblock %}

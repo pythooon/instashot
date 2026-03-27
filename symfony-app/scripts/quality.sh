@@ -24,9 +24,24 @@ fi
 php -d error_reporting=22527 "$PHP_CPD_PHAR" --min-lines 5 --min-tokens 70 src tests
 
 if [[ -n "${DATABASE_URL:-}" ]]; then
+  echo "Waiting for PostgreSQL (DATABASE_URL)…" >&2
+  db_ok=0
+  for _ in $(seq 1 60); do
+    if php bin/console doctrine:query:sql "SELECT 1" >/dev/null 2>&1; then
+      db_ok=1
+      break
+    fi
+    sleep 2
+  done
+  if [[ "$db_ok" != "1" ]]; then
+    echo "ERROR: database not reachable within timeout (check DATABASE_URL)." >&2
+    exit 1
+  fi
   php bin/console doctrine:migrations:migrate --no-interaction --env=test
 else
-  echo "Warning: DATABASE_URL unset — smoke tests will fail if they need a database." >&2
+  echo "Warning: DATABASE_URL unset — skipping migrations; smoke tests may fail." >&2
 fi
 
+echo "Running PHPUnit…" >&2
 ./vendor/bin/phpunit
+echo "PHPUnit: finished (see output above for pass/fail summary)." >&2
