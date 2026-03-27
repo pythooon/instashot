@@ -9,6 +9,8 @@ defmodule PhoenixApiWeb.Plugs.Authenticate do
   def call(conn, _opts) do
     case get_req_header(conn, "access-token") do
       [token] ->
+        token = token |> String.trim()
+
         case Repo.get_by(User, api_token: token) do
           %User{} = user ->
             assign(conn, :current_user, user)

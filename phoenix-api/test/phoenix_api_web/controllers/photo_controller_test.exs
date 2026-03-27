@@ -29,6 +29,7 @@ defmodule PhoenixApiWeb.PhotoControllerTest do
         aperture: "f/2.8",
         shutter_speed: "1/200",
         iso: 100,
+        taken_at: ~U[2024-01-15 10:00:00Z],
         user_id: user.id
       })
       |> Repo.insert!()
@@ -64,15 +65,20 @@ defmodule PhoenixApiWeb.PhotoControllerTest do
         |> put_req_header("access-token", "valid_test_token_123")
         |> get("/api/photos")
 
-      assert json_response(conn, 200) == %{
-               "photos" => [
-                 %{"id" => photo1.id, "photo_url" => photo1.photo_url},
-                 %{"id" => photo2.id, "photo_url" => photo2.photo_url}
-               ]
-             }
+      [p1, p2] = json_response(conn, 200)["photos"]
+
+      assert p1["id"] == photo1.id
+      assert p1["photo_url"] == photo1.photo_url
+      assert p1["camera"] == photo1.camera
+      assert p1["description"] == photo1.description
+      assert p1["location"] == photo1.location
+      assert String.starts_with?(to_string(p1["taken_at"]), "2024-01-15T10:00:00")
+
+      assert p2["id"] == photo2.id
+      assert p2["photo_url"] == photo2.photo_url
     end
 
-    test "returns only id and photo_url fields", %{conn: conn, photo1: photo1} do
+    test "includes metadata fields for gallery import and filtering", %{conn: conn, photo1: photo1} do
       conn =
         conn
         |> put_req_header("access-token", "valid_test_token_123")
@@ -84,12 +90,15 @@ defmodule PhoenixApiWeb.PhotoControllerTest do
       assert length(photos) > 0
 
       first_photo = List.first(photos)
-      assert Map.keys(first_photo) |> Enum.sort() == ["id", "photo_url"]
+
+      assert Map.keys(first_photo) |> Enum.sort() ==
+               ["camera", "description", "id", "location", "photo_url", "taken_at"]
+
       assert first_photo["id"] == photo1.id
       assert first_photo["photo_url"] == photo1.photo_url
-      refute Map.has_key?(first_photo, "camera")
-      refute Map.has_key?(first_photo, "lens")
-      refute Map.has_key?(first_photo, "description")
+      assert first_photo["camera"] == photo1.camera
+      assert first_photo["description"] == photo1.description
+      assert first_photo["location"] == photo1.location
     end
 
     test "returns empty array when user has no photos", %{conn: conn} do

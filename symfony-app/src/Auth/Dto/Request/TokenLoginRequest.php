@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace App\Auth\Dto\Request;
 
-use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class TokenLoginRequest
 {
     public function __construct(
-        #[SerializedName('username')]
         #[Assert\NotBlank(message: 'Username is required.')]
         #[Assert\Length(max: 180, maxMessage: 'Username cannot be longer than {{ limit }} characters.')]
         #[Assert\Regex(
@@ -18,7 +16,6 @@ final readonly class TokenLoginRequest
             message: 'Username may only contain letters, digits, underscore, dot and hyphen.'
         )]
         private string $username,
-        #[SerializedName('token')]
         #[Assert\NotBlank(message: 'Token is required.')]
         #[Assert\Length(
             min: 32,

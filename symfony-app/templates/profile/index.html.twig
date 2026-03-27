@@ -145,6 +145,85 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
+        .phoenix-panel {
+            margin-top: 28px;
+            padding: 24px;
+            border-radius: 12px;
+            background: #f0f4ff;
+            border: 1px solid #c5d0f0;
+        }
+
+        .phoenix-panel h2 {
+            font-size: 1.1em;
+            color: #445;
+            margin-bottom: 12px;
+        }
+
+        .phoenix-panel input[type="text"],
+        .phoenix-panel input[type="password"] {
+            width: 100%;
+            max-width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #ccd;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        .remove-token-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.88em;
+            color: #555;
+            margin: 10px 0 14px 0;
+            cursor: pointer;
+        }
+
+        .remove-token-option input {
+            margin: 0;
+        }
+
+        .phoenix-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-primary {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95em;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.95;
+        }
+
+        .btn-secondary {
+            padding: 12px 22px;
+            border-radius: 25px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95em;
+        }
+
+        .token-status {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 10px;
+        }
     </style>
 {% endblock %}
 
@@ -162,6 +241,9 @@
                 {% endif %}
             </h1>
             <div class="profile-handle">@{{ profile.username }}</div>
+            <p style="margin-top: 14px; font-size: 0.92em; color: #666; line-height: 1.5; max-width: 520px; margin-left: auto; margin-right: auto;">
+                Profil — dane konta, liczba zdjęć oraz <strong>import z Phoenix API</strong> (poniżej). Strona główna: galeria, filtry, polubienia po zalogowaniu.
+            </p>
         </div>
         
         <div class="profile-details">
@@ -202,6 +284,33 @@
                 <div class="stat-number">{{ profile.photosCount }}</div>
                 <div class="stat-label">Photos</div>
             </div>
+        </div>
+
+        <div id="phoenix-import" class="phoenix-panel">
+            <h2>Import zdjęć</h2>
+            <div class="token-status">
+                {% if profile.hasPhoenixAccessToken %}
+                    Token: <strong>zapisany</strong>
+                {% else %}
+                    Token: <strong>brak</strong>
+                {% endif %}
+            </div>
+            <form method="post" action="{{ path('profile_phoenix_token_save') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token(phoenix_token_csrf) }}">
+                <label for="phoenix_access_token" class="profile-field-label">Token dostępu</label>
+                <input id="phoenix_access_token" type="password" name="phoenix_access_token" autocomplete="new-password" spellcheck="false" autocapitalize="off" placeholder="">
+                <label class="remove-token-option">
+                    <input type="checkbox" name="remove_phoenix_token" value="1">
+                    Usuń zapisany token
+                </label>
+                <div class="phoenix-actions">
+                    <button type="submit" class="btn-primary">Zapisz token</button>
+                </div>
+            </form>
+            <form method="post" action="{{ path('profile_import_phoenix') }}" style="margin-top: 18px;">
+                <input type="hidden" name="_token" value="{{ csrf_token(phoenix_import_csrf) }}">
+                <button type="submit" class="btn-secondary">Importuj zdjęcia</button>
+            </form>
         </div>
         
         <div style="text-align: center;">

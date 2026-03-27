@@ -29,6 +29,7 @@ final readonly class ProfileViewMapper
             age: $user->getAge(),
             bio: $user->getBio(),
             photosCount: $user->getPhotos()->count(),
+            hasPhoenixAccessToken: $user->hasPhoenixAccessToken(),
         );
     }
 }

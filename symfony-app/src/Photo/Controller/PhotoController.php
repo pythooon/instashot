@@ -4,34 +4,36 @@ declare(strict_types=1);
 
 namespace App\Photo\Controller;
 
-use App\Photo\Dto\Request\PhotoLikeQuery;
+use App\Photo\Dto\Request\PhotoLikePayload;
 use App\Photo\Dto\Request\TogglePhotoLikeRequest;
 use App\Photo\Enum\TogglePhotoLikeResultType;
 use App\Photo\Service\PhotoLikeApplicationServiceInterface;
 use App\Shared\Session\SessionUserIdReader;
-use App\Shared\Validation\ViolationListPresenter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class PhotoController extends AbstractController
 {
+    public const CSRF_PHOTO_LIKE = 'home_photo_like';
+
     public function __construct(
         private readonly PhotoLikeApplicationServiceInterface $photoLikeApplicationService,
-        private readonly ValidatorInterface $validator,
     ) {
     }
 
-    #[Route('/photo/like', name: 'photo_like', methods: ['GET'])]
+    #[Route('/photo/like', name: 'photo_like', methods: ['POST'])]
     public function like(
-        #[MapQueryString(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
-        PhotoLikeQuery $query,
-        Request $request,
+        SessionInterface $session,
+        #[MapRequestPayload]
+        PhotoLikePayload $payload = new PhotoLikePayload(),
     ): Response {
-        $session = $request->getSession();
+        if (!$this->isCsrfTokenValid(self::CSRF_PHOTO_LIKE, $payload->getCsrfToken())) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
         $userId = SessionUserIdReader::fromSessionValue($session->get('user_id'));
         if ($userId === null) {
             $this->addFlash('error', 'You must be logged in to like photos.');
@@ -39,13 +41,7 @@ final class PhotoController extends AbstractController
             return $this->redirectToRoute('home');
         }
 
-        $toggleRequest = new TogglePhotoLikeRequest(photoId: $query->getPhotoId(), userId: $userId);
-        $violations = $this->validator->validate($toggleRequest);
-        if ($violations->count() > 0) {
-            $this->addFlash('error', ViolationListPresenter::toPlainText($violations));
-
-            return $this->redirectToRoute('home');
-        }
+        $toggleRequest = new TogglePhotoLikeRequest(photoId: $payload->getPhotoId(), userId: $userId);
 
         $result = $this->photoLikeApplicationService->togglePhotoLike($toggleRequest);
 

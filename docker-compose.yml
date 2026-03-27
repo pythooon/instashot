@@ -9,13 +9,8 @@ services:
     volumes:
       - phoenix-db-data:/var/lib/postgresql/data
     ports:
+      # 15433 — unikaj konfliktu z innymi Postgresami na hoście
       - "15433:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d phoenix_api"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-      start_period: 10s
 
   symfony-db:
     image: postgres:15
@@ -28,12 +23,6 @@ services:
       - symfony-db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d instashot"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-      start_period: 10s
 
   phoenix:
     build: 
@@ -41,8 +30,7 @@ services:
       dockerfile: Dockerfile
       target: dev
     depends_on:
-      phoenix-db:
-        condition: service_healthy
+      - phoenix-db
     environment:
       DATABASE_URL: ecto://postgres:postgres@phoenix-db/phoenix_api
       SECRET_KEY_BASE: ${PHOENIX_SECRET_KEY_BASE:-thisisasecret111}
@@ -52,12 +40,6 @@ services:
       - "4000:4000"
     volumes:
       - ./phoenix-api:/app
-    healthcheck:
-      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/4000' || exit 1"]
-      interval: 5s
-      timeout: 3s
-      retries: 12
-      start_period: 180s
 
   symfony:
     build:
@@ -65,23 +47,17 @@ services:
       dockerfile: Dockerfile
       target: dev
     depends_on:
-      symfony-db:
-        condition: service_healthy
+      - symfony-db
+      - phoenix
     environment:
       APP_ENV: dev
       APP_SECRET: ${SYMFONY_APP_SECRET:-thisisasecret222}
       PHOENIX_BASE_URL: http://phoenix:4000
-      DATABASE_URL: postgres://postgres:postgres@symfony-db:5432/instashot
+      DATABASE_URL: postgresql://postgres:postgres@symfony-db:5432/instashot?serverVersion=15&charset=utf8
     ports:
       - "8000:8000"
     volumes:
       - ./symfony-app:/app
-    healthcheck:
-      test: ["CMD-SHELL", "test -f /app/vendor/autoload.php"]
-      interval: 5s
-      timeout: 3s
-      retries: 60
-      start_period: 300s
 
 volumes:
   phoenix-db-data:

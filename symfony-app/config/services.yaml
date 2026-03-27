@@ -1,3 +1,6 @@
+parameters:
+    app.default_phoenix_url: 'http://127.0.0.1:4000'
+
 services:
     _defaults:
         autowire: true
@@ -36,3 +39,12 @@ services:
 
     App\Profile\Service\ProfilePageServiceInterface:
         alias: App\Profile\Service\ProfilePageService
+
+    App\Integration\Phoenix\PhoenixPhotosClientInterface:
+        alias: App\Integration\Phoenix\PhoenixPhotosClient
+
+    App\Profile\Service\ImportPhoenixPhotosServiceInterface:
+        alias: App\Profile\Service\ImportPhoenixPhotosService
+
+    App\Profile\Service\SavePhoenixAccessTokenServiceInterface:
+        alias: App\Profile\Service\SavePhoenixAccessTokenService

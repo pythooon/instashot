@@ -69,6 +69,11 @@
     "phpcbf": "phpcbf",
     "phpcpd": "php -d error_reporting=22527 tools/phpcpd.phar --min-lines 5 --min-tokens 70 src tests",
     "test": "phpunit",
+    "database:seed": "php bin/console app:seed --no-interaction",
+    "database:init": [
+      "php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration",
+      "@database:seed"
+    ],
     "quality": [
       "@phpstan",
       "@phpcs",

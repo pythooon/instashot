@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Logowanie — Insta Shot{% endblock %}
+
+{% block styles %}
+    <style>
+        .login-wrap {
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px 28px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        }
+
+        .login-card h2 {
+            font-size: 1.35em;
+            color: #333;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .login-field {
+            margin-bottom: 18px;
+        }
+
+        .login-field label {
+            display: block;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #667eea;
+            margin-bottom: 6px;
+        }
+
+        .login-field input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #ccd;
+            border-radius: 10px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        .login-field input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .login-submit {
+            width: 100%;
+            margin-top: 8px;
+            padding: 14px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .login-submit:hover {
+            opacity: 0.95;
+        }
+
+        .login-back {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: rgba(255,255,255,0.95);
+            font-size: 0.95em;
+        }
+
+        .login-back a {
+            color: white;
+            font-weight: 600;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="login-wrap">
+        <div class="login-card">
+            <h2>Logowanie</h2>
+            <form method="post" action="{{ path('login_submit') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token(csrf_token_id) }}">
+                <div class="login-field">
+                    <label for="login_username">Username</label>
+                    <input id="login_username" type="text" name="username" required autocomplete="username" value="{{ last_username|default('') }}" placeholder="np. nature_lover">
+                </div>
+                <div class="login-field">
+                    <label for="login_token">Token</label>
+                    <input id="login_token" type="password" name="token" required autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="64-znakowy hex">
+                </div>
+                <button type="submit" class="login-submit">Zaloguj się</button>
+            </form>
+        </div>
+        <p class="login-back"><a href="{{ path('home') }}">← Wróć do galerii</a></p>
+    </div>
+{% endblock %}

@@ -9,6 +9,7 @@
         <!-- Docker often sets APP_ENV=dev; test client wymaga środowiska test -->
         <env name="APP_ENV" value="test" force="true"/>
         <env name="APP_DEBUG" value="1" force="true"/>
+        <env name="PHOENIX_BASE_URL" value="http://127.0.0.1:4000" force="true"/>
     </php>
     <testsuites>
         <testsuite name="App Test Suite">

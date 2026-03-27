@@ -6,11 +6,6 @@ namespace Tests\Smoke\Photo\Controller;
 
 use Tests\Smoke\Shared\SmokeWebTestCase;
 
-/**
- * Smoke modułu Photo — strona główna (feed), polubienie zdjęcia.
- *
- * Strona główna odczytuje zdjęcia z bazy (jak w runtime).
- */
 final class PhotoSmokeTest extends SmokeWebTestCase
 {
     public function testHomeReturnsOk(): void
@@ -24,7 +19,19 @@ final class PhotoSmokeTest extends SmokeWebTestCase
     public function testPhotoLikeWithoutSessionRedirectsToHome(): void
     {
         $client = static::createClient();
-        $client->request('GET', $this->pathForRoute('photo_like', ['photoId' => 1]));
+        $this->logInAsNatureLover($client);
+        $crawler = $client->request('GET', $this->pathForRoute('home'));
+        self::assertResponseIsSuccessful();
+
+        $request = $client->getRequest();
+        self::assertNotNull($request);
+        $session = $request->getSession();
+        $session->remove('user_id');
+        $session->remove('username');
+        $session->save();
+
+        $form = $crawler->filter('form.photo-like-form')->first()->form();
+        $client->submit($form);
 
         $this->assertRedirectsToRoute('home');
     }

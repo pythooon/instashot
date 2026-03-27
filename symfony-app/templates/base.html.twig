@@ -34,12 +34,46 @@
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
+
+        header h1 a.site-title-link {
+            color: inherit;
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        header h1 a.site-title-link:hover {
+            opacity: 0.92;
+        }
         
         header p {
             font-size: 1.2em;
             opacity: 0.9;
         }
         
+        .auth-login-link {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .auth-login-link a {
+            display: inline-block;
+            padding: 12px 20px;
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 14px;
+        }
+
+        .auth-login-link a:hover {
+            box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+        }
+
         .profile-menu {
             position: fixed;
             top: 20px;
@@ -103,6 +137,29 @@
         .profile-dropdown a:last-child {
             border-radius: 0 0 12px 12px;
         }
+
+        .profile-dropdown-logout {
+            margin: 0;
+            padding: 0;
+        }
+
+        .profile-dropdown-logout .profile-dropdown-link {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: inherit;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .profile-dropdown-logout .profile-dropdown-link:hover {
+            background: #f8f9fa;
+        }
         
         .profile-dropdown a:hover {
             background: #f8f9fa;
@@ -122,9 +179,11 @@
             z-index: 9999;
             min-width: 300px;
             max-width: 500px;
+            pointer-events: none;
         }
         
         .flash-message {
+            pointer-events: auto;
             padding: 16px 24px;
             border-radius: 12px;
             color: white;
@@ -183,6 +242,12 @@
         </div>
     {% endfor %}
     
+    {% if not app.session.get('user_id') and app.request.attributes.get('_route') != 'login' %}
+        <div class="auth-login-link">
+            <a href="{{ path('login') }}">🔑 Zaloguj się</a>
+        </div>
+    {% endif %}
+
     {% if app.session.get('user_id') %}
         <div class="profile-menu">
             <a href="{{ path('profile') }}" class="profile-icon" title="My Profile">
@@ -191,14 +256,17 @@
             <div class="profile-dropdown">
                 <a href="{{ path('profile') }}">👤 My Profile</a>
                 <div class="profile-dropdown-separator"></div>
-                <a href="{{ path('logout') }}">🚪 Logout</a>
+                <form method="post" action="{{ path('logout') }}" class="profile-dropdown-logout">
+                    <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">
+                    <button type="submit" class="profile-dropdown-link">🚪 Logout</button>
+                </form>
             </div>
         </div>
     {% endif %}
     
     <div class="container">
         <header>
-            <h1>📸 Insta Shot</h1>
+            <h1><a href="{{ path('home') }}" class="site-title-link">📸 Insta Shot</a></h1>
             <p>Discover amazing photography from our community</p>
         </header>
         

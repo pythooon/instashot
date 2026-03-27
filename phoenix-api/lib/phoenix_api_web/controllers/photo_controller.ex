@@ -13,8 +13,18 @@ defmodule PhoenixApiWeb.PhotoController do
     photos =
       Photo
       |> where([p], p.user_id == ^current_user.id)
-      |> select([p], %{id: p.id, photo_url: p.photo_url})
+      |> order_by([p], asc: p.id)
       |> Repo.all()
+      |> Enum.map(fn p ->
+        %{
+          id: p.id,
+          photo_url: p.photo_url,
+          camera: p.camera,
+          description: p.description,
+          location: p.location,
+          taken_at: p.taken_at && DateTime.to_iso8601(p.taken_at)
+        }
+      end)
 
     json(conn, %{photos: photos})
   end

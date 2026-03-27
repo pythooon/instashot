@@ -40,6 +40,7 @@ final class ProfilePageServiceTest extends TestCase
         $user->method('getAge')->willReturn(null);
         $user->method('getBio')->willReturn(null);
         $user->method('getPhotos')->willReturn($photos);
+        $user->method('hasPhoenixAccessToken')->willReturn(false);
 
         $userRepo = $this->createMock(UserRepositoryInterface::class);
         $userRepo->method('find')->with(1)->willReturn($user);

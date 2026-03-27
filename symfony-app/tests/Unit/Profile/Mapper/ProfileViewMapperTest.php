@@ -25,6 +25,7 @@ final class ProfileViewMapperTest extends TestCase
         $user->method('getAge')->willReturn(30);
         $user->method('getBio')->willReturn('Bio text');
         $user->method('getPhotos')->willReturn($photos);
+        $user->method('hasPhoenixAccessToken')->willReturn(true);
 
         $view = (new ProfileViewMapper())->toProfileView($user);
 
@@ -36,6 +37,7 @@ final class ProfileViewMapperTest extends TestCase
         $this->assertSame(30, $view->getAge());
         $this->assertSame('Bio text', $view->getBio());
         $this->assertSame(4, $view->getPhotosCount());
+        $this->assertTrue($view->hasPhoenixAccessToken());
     }
 
     public function testThrowsWhenUserNotPersisted(): void

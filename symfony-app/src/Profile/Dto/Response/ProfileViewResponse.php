@@ -15,6 +15,7 @@ final readonly class ProfileViewResponse
         private ?int $age,
         private ?string $bio,
         private int $photosCount,
+        private bool $hasPhoenixAccessToken,
     ) {
     }
 
@@ -56,5 +57,10 @@ final readonly class ProfileViewResponse
     public function getPhotosCount(): int
     {
         return $this->photosCount;
+    }
+
+    public function hasPhoenixAccessToken(): bool
+    {
+        return $this->hasPhoenixAccessToken;
     }
 }

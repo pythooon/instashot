@@ -6,39 +6,77 @@ namespace Tests\Smoke\Auth\Controller;
 
 use Tests\Smoke\Shared\SmokeWebTestCase;
 
-/**
- * Smoke modułu Auth — logowanie tokenem, wylogowanie.
- */
 final class AuthSmokeTest extends SmokeWebTestCase
 {
+    public function testLoginPageReturnsOk(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', $this->pathForRoute('login'));
+
+        self::assertResponseIsSuccessful();
+    }
+
     public function testLogoutRedirectsToHome(): void
     {
         $client = static::createClient();
-        $client->request('GET', $this->pathForRoute('logout'));
+        $this->logInAsNatureLover($client);
+        $crawler = $client->request('GET', $this->pathForRoute('profile'));
+        self::assertResponseIsSuccessful();
+        $form = $crawler->filter('form.profile-dropdown-logout')->form();
+        $client->submit($form);
 
         $this->assertRedirectsToRoute('home');
     }
 
-    public function testLoginWithUnknownValidHexTokenReturnsUnauthorized(): void
+    public function testLoginSubmitWithUnknownValidHexTokenRedirectsToLogin(): void
     {
         $client = static::createClient();
-        $token = str_repeat('ab', 32);
-        $client->request(
-            'GET',
-            $this->pathForRoute('auth_login', ['username' => 'nature_lover', 'token' => $token])
-        );
+        $crawler = $client->request('GET', $this->pathForRoute('login'));
+        self::assertResponseIsSuccessful();
 
-        self::assertResponseStatusCodeSame(401);
+        $form = $crawler->selectButton('Zaloguj się')->form([
+            'username' => 'nature_lover',
+            'token' => str_repeat('ab', 32),
+        ]);
+        $client->submit($form);
+
+        $this->assertRedirectsToRoute('login', ['username' => 'nature_lover']);
     }
 
-    public function testLoginWithInvalidTokenDtoReturnsBadRequest(): void
+    public function testLoginSubmitWithSeedCredentialsRedirectsToProfile(): void
     {
         $client = static::createClient();
-        $client->request(
-            'GET',
-            $this->pathForRoute('auth_login', ['username' => 'nature_lover', 'token' => 'short'])
-        );
+        $crawler = $client->request('GET', $this->pathForRoute('login'));
+        self::assertResponseIsSuccessful();
 
-        self::assertResponseStatusCodeSame(400);
+        $form = $crawler->selectButton('Zaloguj się')->form([
+            'username' => 'nature_lover',
+            'token' => self::NATURE_LOVER_SEED_TOKEN,
+        ]);
+        $client->submit($form);
+
+        self::assertResponseRedirects();
+        $location = (string) $client->getResponse()->headers->get('Location', '');
+        self::assertStringContainsString($this->pathForRoute('profile'), $location);
+        self::assertStringContainsString('phoenix-import', $location);
+
+        $client->followRedirect();
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString('Profile', $client->getCrawler()->filter('title')->text());
+    }
+
+    public function testLoginSubmitWithInvalidTokenLengthReturnsUnprocessable(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', $this->pathForRoute('login'));
+        self::assertResponseIsSuccessful();
+
+        $form = $crawler->selectButton('Zaloguj się')->form([
+            'username' => 'nature_lover',
+            'token' => 'short',
+        ]);
+        $client->submit($form);
+
+        self::assertResponseStatusCodeSame(422);
     }
 }

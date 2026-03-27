@@ -24,7 +24,7 @@ final class AuthTokenRepository extends ServiceEntityRepository implements AuthT
         $authToken = $this->createQueryBuilder('at')
             ->innerJoin('at.user', 'u')
             ->addSelect('u')
-            ->where('at.token = :token')
+            ->where('LOWER(at.token) = LOWER(:token)')
             ->setParameter('token', $token)
             ->getQuery()
             ->getOneOrNullResult();
