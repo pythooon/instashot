@@ -60,3 +60,7 @@ Zrobione.
 ## Zadanie 3
 
 Zrobione.
+
+## Zadanie 4
+
+Zrobione.

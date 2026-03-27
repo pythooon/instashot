@@ -6,6 +6,8 @@ defmodule PhoenixApiWeb.PhotoControllerTest do
   alias PhoenixApi.Media.Photo
 
   setup do
+    PhoenixApi.ImportRateLimiter.reset()
+
     user =
       %User{}
       |> User.changeset(%{api_token: "valid_test_token_123"})
@@ -102,7 +104,7 @@ defmodule PhoenixApiWeb.PhotoControllerTest do
     end
 
     test "returns empty array when user has no photos", %{conn: conn} do
-      new_user =
+      _new_user =
         %User{}
         |> User.changeset(%{api_token: "new_user_token"})
         |> Repo.insert!()
@@ -143,6 +145,62 @@ defmodule PhoenixApiWeb.PhotoControllerTest do
       response = json_response(conn, 200)
       assert length(response["photos"]) == 1
       assert Enum.at(response["photos"], 0)["photo_url"] == "https://example.com/photo3.jpg"
+    end
+
+    test "returns 429 when user exceeds per-account rate limit", %{conn: conn} do
+      token = "valid_test_token_123"
+
+      for _ <- 1..3 do
+        conn =
+          conn
+          |> recycle()
+          |> put_req_header("access-token", token)
+          |> get("/api/photos")
+
+        assert conn.status == 200
+      end
+
+      conn =
+        conn
+        |> recycle()
+        |> put_req_header("access-token", token)
+        |> get("/api/photos")
+
+      assert conn.status == 429
+      body = json_response(conn, 429)
+      assert body["errors"]["detail"] =~ "Too many photo list requests"
+    end
+
+    test "returns 429 when global rate limit is exceeded", %{conn: conn} do
+      tokens =
+        for i <- 1..5 do
+          u =
+            %User{}
+            |> User.changeset(%{api_token: "global_rl_token_#{i}"})
+            |> Repo.insert!()
+
+          u.api_token
+        end
+
+      for t <- tokens do
+        conn =
+          conn
+          |> recycle()
+          |> put_req_header("access-token", t)
+          |> get("/api/photos")
+
+        assert conn.status == 200
+      end
+
+      conn =
+        conn
+        |> recycle()
+        |> put_req_header("access-token", List.last(tokens))
+        |> get("/api/photos")
+
+      assert conn.status == 429
+      body = json_response(conn, 429)
+      assert body["errors"]["detail"] =~ "temporarily overloaded"
     end
   end
 end

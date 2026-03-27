@@ -13,4 +13,10 @@ config :phoenix_api, PhoenixApiWeb.Endpoint,
   secret_key_base: String.duplicate("a", 64),
   server: false
 
-config :logger, level: :warn
+config :logger, level: :warning
+
+config :phoenix_api, :import_rate_limit,
+  user_max_requests: 3,
+  user_window_seconds: 60,
+  global_max_requests: 5,
+  global_window_seconds: 60
