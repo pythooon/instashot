@@ -2,7 +2,7 @@
   "name": "zadanie/symfony-app",
   "type": "project",
   "require": {
-    "php": "^8.1",
+    "php": "^8.5",
     "doctrine/annotations": "^2.0",
     "doctrine/doctrine-bundle": "^2.10",
     "doctrine/doctrine-migrations-bundle": "^3.6",
@@ -23,7 +23,10 @@
     "symfony/yaml": "^6.4"
   },
   "require-dev": {
+    "phpstan/phpstan": "^1.12",
+    "phpstan/phpstan-symfony": "^1.4",
     "phpunit/phpunit": "^10.5",
+    "squizlabs/php_codesniffer": "^3.10",
     "symfony/browser-kit": "6.4.*",
     "symfony/css-selector": "6.4.*",
     "symfony/maker-bundle": "^1.53",
@@ -60,6 +63,17 @@
     ],
     "post-update-cmd": [
       "@auto-scripts"
+    ],
+    "phpstan": "phpstan analyse --memory-limit=512M",
+    "phpcs": "phpcs",
+    "phpcbf": "phpcbf",
+    "phpcpd": "php -d error_reporting=22527 tools/phpcpd.phar --min-lines 5 --min-tokens 70 src tests",
+    "test": "phpunit",
+    "quality": [
+      "@phpstan",
+      "@phpcs",
+      "@phpcpd",
+      "@test"
     ]
   },
   "extra": {

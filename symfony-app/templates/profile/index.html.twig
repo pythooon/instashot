@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Profile - {{ user.username }}{% endblock %}
+{% block title %}Profile - {{ profile.username }}{% endblock %}
 
 {% block styles %}
     <style>
@@ -152,54 +152,54 @@
     <div class="profile-container">
         <div class="profile-header">
             <div class="profile-avatar">
-                {{ user.username|slice(0, 1)|upper }}
+                {{ profile.username|slice(0, 1)|upper }}
             </div>
             <h1 class="profile-username">
-                {% if user.name %}
-                    {{ user.name }} {{ user.lastName|default('') }}
+                {% if profile.name %}
+                    {{ profile.name }} {{ profile.lastName|default('') }}
                 {% else %}
-                    {{ user.username }}
+                    {{ profile.username }}
                 {% endif %}
             </h1>
-            <div class="profile-handle">@{{ user.username }}</div>
+            <div class="profile-handle">@{{ profile.username }}</div>
         </div>
         
         <div class="profile-details">
             <div class="profile-field">
                 <div class="profile-field-label">Email</div>
-                <div class="profile-field-value">{{ user.email }}</div>
+                <div class="profile-field-value">{{ profile.email }}</div>
             </div>
             
-            {% if user.age %}
+            {% if profile.age %}
                 <div class="profile-field">
                     <div class="profile-field-label">Age</div>
-                    <div class="profile-field-value">{{ user.age }} years old</div>
+                    <div class="profile-field-value">{{ profile.age }} years old</div>
                 </div>
             {% endif %}
             
-            {% if user.name %}
+            {% if profile.name %}
                 <div class="profile-field">
                     <div class="profile-field-label">Full Name</div>
                     <div class="profile-field-value">
-                        {{ user.name }}
-                        {% if user.lastName %}
-                            {{ user.lastName }}
+                        {{ profile.name }}
+                        {% if profile.lastName %}
+                            {{ profile.lastName }}
                         {% endif %}
                     </div>
                 </div>
             {% endif %}
         </div>
         
-        {% if user.bio %}
+        {% if profile.bio %}
             <div class="profile-bio">
                 <div class="profile-bio-label">About Me</div>
-                <div class="profile-bio-text">{{ user.bio }}</div>
+                <div class="profile-bio-text">{{ profile.bio }}</div>
             </div>
         {% endif %}
         
         <div class="profile-stats">
             <div class="stat-item">
-                <div class="stat-number">{{ user.photos|length }}</div>
+                <div class="stat-number">{{ profile.photosCount }}</div>
                 <div class="stat-label">Photos</div>
             </div>
         </div>
@@ -209,4 +209,3 @@
         </div>
     </div>
 {% endblock %}
-

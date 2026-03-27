@@ -1,6 +1,12 @@
-# Define your routes here
-controllers:
-    resource:
-        path: ../src/Controller/
-        namespace: App\Controller
+# Kontrolery wg modułów (atrybuty Route)
+auth_controllers:
+    resource: ../src/Auth/Controller/
+    type: attribute
+
+photo_controllers:
+    resource: ../src/Photo/Controller/
+    type: attribute
+
+profile_controllers:
+    resource: ../src/Profile/Controller/
     type: attribute

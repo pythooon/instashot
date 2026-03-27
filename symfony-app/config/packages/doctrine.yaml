@@ -8,18 +8,18 @@ doctrine:
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
         auto_mapping: true
         mappings:
-            App:
+            Photo:
                 is_bundle: false
-                dir: '%kernel.project_dir%/src/Entity'
-                prefix: 'App\Entity'
-                alias: App
-            Likes:
+                dir: '%kernel.project_dir%/src/Photo/Entity'
+                prefix: 'App\Photo\Entity'
+                alias: Photo
+            Auth:
                 is_bundle: false
-                dir: '%kernel.project_dir%/src/Likes'
-                prefix: 'App\Likes'
-                alias: Likes
-
-when@test:
-    doctrine:
-        dbal:
-            dbname_suffix: '_test'
+                dir: '%kernel.project_dir%/src/Auth/Entity'
+                prefix: 'App\Auth\Entity'
+                alias: Auth
+            Like:
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Like/Entity'
+                prefix: 'App\Like\Entity'
+                alias: Like

@@ -1,0 +1,13 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Photo\Service;
+
+use App\Photo\Dto\Request\TogglePhotoLikeRequest;
+use App\Photo\Enum\TogglePhotoLikeResultType;
+
+interface PhotoLikeApplicationServiceInterface
+{
+    public function togglePhotoLike(TogglePhotoLikeRequest $request): TogglePhotoLikeResultType;
+}

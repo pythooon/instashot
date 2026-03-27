@@ -7,3 +7,32 @@ services:
         resource: '../src/'
         exclude:
             - '../src/Kernel.php'
+            - '../src/**/Dto/'
+            - '../src/**/Entity/'
+
+    App\Auth\Repository\UserRepositoryInterface:
+        alias: App\Auth\Repository\UserRepository
+
+    App\Auth\Repository\AuthTokenRepositoryInterface:
+        alias: App\Auth\Repository\AuthTokenRepository
+
+    App\Photo\Repository\PhotoRepositoryInterface:
+        alias: App\Photo\Repository\PhotoRepository
+
+    App\Like\Repository\LikeRepositoryInterface:
+        alias: App\Like\Repository\LikeRepository
+
+    App\Like\Service\LikeServiceInterface:
+        alias: App\Like\Service\LikeService
+
+    App\Auth\Service\TokenLoginServiceInterface:
+        alias: App\Auth\Service\TokenLoginService
+
+    App\Photo\Service\HomeFeedServiceInterface:
+        alias: App\Photo\Service\HomeFeedService
+
+    App\Photo\Service\PhotoLikeApplicationServiceInterface:
+        alias: App\Photo\Service\PhotoLikeApplicationService
+
+    App\Profile\Service\ProfilePageServiceInterface:
+        alias: App\Profile\Service\ProfilePageService
