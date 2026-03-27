@@ -79,6 +79,6 @@ Zrobione.
 Starałem się jak najbardziej pokazać moje umiejętności, zastanawiałem się nad używaniem bardziej skomplikowanej
 architektury jak np. hexagon albo architektury 4 warstwowej, lecz uznałem to za przerost formy nad treścią.
 Kod jest otestowany, podłączana jest analiza statyczna. W zasadzie ze wszystkim zdażyłem, wspomagałem się rzecz jasna
-Cursorem, zwłaszcza do zadania nr. 4, dzięki temu udało mi się to zadanie w obecnym kształcie ukończyć w kilka h.
+Cursorem, zwłaszcza do zadania nr. 4, dzięki temu udało mi się te zadania w obecnym kształcie ukończyć w kilka h.
 Moim zdaniem w obecnych czasach nawet najszybciej piszący programista nie jest w stanie pisać kodu szybciej niż agenci
 AI, dlatego staram się korzystać i wnosić realną wartość wspomaganiem się tymi narzędziami.
